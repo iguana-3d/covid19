@@ -2,29 +2,42 @@ import React, { useMemo } from "react";
 import type { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts";
 import { ICasesByCity } from "../../services/coronavirus.types";
-import randomColor from "randomcolor";
+// import randomColor from "randomcolor";
 import { Box, Grid, Typography } from "@mui/material";
 
 interface IProps {
   casesByCity: ICasesByCity[];
 }
 
+const colors = [
+  "#daff08",
+  "#EEE5E9",
+  "#256EFF",
+  "#960bf3",
+  "#52DEE5",
+  "#FF495C",
+  "#3DDC97",
+  "#46237A",
+  "#256EFF",
+  "#224870",
+  "#4EA5D9",
+  "#44CFCB",
+];
+
 const ChartDonut: React.FC<IProps> = ({ casesByCity }) => {
   const data = useMemo(() => {
-    return (
-      {
-        series: casesByCity
-      ?.filter((caseByCity) => !!caseByCity.city)
-      ?.map((caseByCity) => {
-        return {
-          color: randomColor(),
-          data: caseByCity.last_available_confirmed,
-          label: caseByCity.city,
-        };
-      }),
-      }
-    )
-  }, [casesByCity])
+    return {
+      series: casesByCity
+        ?.filter((caseByCity) => !!caseByCity.city)
+        ?.map((caseByCity, index) => {
+          return {
+            color: colors[index], //randomColor() retirado por conta de um bug de recálcular a cor ao trocar a data
+            data: caseByCity.last_available_confirmed,
+            label: caseByCity.city,
+          };
+        }),
+    };
+  }, [casesByCity]);
 
   const chartOptions: ApexOptions = {
     chart: {
