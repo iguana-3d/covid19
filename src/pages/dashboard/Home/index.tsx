@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -14,10 +14,9 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import type { ApexOptions } from "apexcharts";
 import dayjs, { Dayjs } from "dayjs";
-import Chart from "react-apexcharts";
 import TableList from "./TableList";
+import ChartDonut from "./ChartDonut";
 //Services
 import { getCoronavirusCases } from "../../services/coronavirus.service";
 //Types
@@ -65,73 +64,15 @@ const Home: React.FC = () => {
     setUnitFederation(event.target.value);
   };
 
-  const data = {
-    series: [
-      {
-        color: "rgba(86, 100, 210, 0.5)",
-        data: 10,
-        label: "Cidade 1",
-      },
-      {
-        color: "#FFB547",
-        data: 10,
-        label: "Cidade 2",
-      },
-      {
-        color: "#7BC67E",
-        data: 20,
-        label: "Cidade 3",
-      },
-    ],
-  };
-
-  const sanitizeCoronaVirusChartData = () => {
-    // return !!coronaVirusCasesData && coronaVirusCasesData.results.slice(0, 5).map((casesByCity) => {
-    //   return {
-    //     color: "rgba(86, 100, 210, 0.5)",
-    //     data: casesByCity.last_available_confirmed,
-    //     label: casesByCity.city,
-    //   };
-    // });
-  };
-
-  const chartOptions: ApexOptions = {
-    chart: {
-      background: "transparent",
-      stacked: false,
-      toolbar: {
-        show: false,
-      },
-    },
-    colors: data.series.map((item) => item.color),
-    dataLabels: {
-      enabled: false,
-    },
-    fill: {
-      opacity: 1,
-    },
-    labels: data.series.map((item) => item.label),
-    legend: {
-      show: false,
-    },
-    stroke: {
-      width: 0,
-    },
-  };
-
   const getCoronavirusCasesData = () => {
-    getCoronavirusCases(dateCases, unitFederation).then((responseData) => {
-      setCoronaVirusCasesData(responseData);
-    });
+    getCoronavirusCases(dateCases, unitFederation)
+      .then((responseData) => {
+        setCoronaVirusCasesData(responseData);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
-
-  useEffect(() => {
-    !!coronaVirusCasesData &&
-      console.log(
-        "sanitizeCoronaVirusChartData",
-        sanitizeCoronaVirusChartData()
-      );
-  }, [coronaVirusCasesData]);
 
   return (
     <Box>
@@ -144,67 +85,57 @@ const Home: React.FC = () => {
         elevation={3}
       >
         <Typography variant="h3">Relatório de Casos</Typography>
-        <Box sx={{ display: "flex", gap: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              maxWidth: 400,
-              width: "100%",
-              gap: 1,
-            }}
-          >
-            <Box component="span">UF</Box>
-            <FormControl fullWidth>
-              <Select
-                value={unitFederation}
-                onChange={handleUnitFederationChange}
-                fullWidth
-                displayEmpty
-              >
-                {unitFederations.map((uf) => (
-                  <MenuItem key={uf.value} value={uf.value}>
-                    {uf.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            {/* <TextField
-              select
-              value={unitFederation}
-              onChange={handleUnitFederationChange}
-              fullWidth
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+                gap: 1,
+              }}
             >
-              {unitFederations.map((uf) => (
-                <MenuItem key={uf.value} value={uf.value}>
-                  {uf.label}
-                </MenuItem>
-              ))}
-            </TextField> */}
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              maxWidth: 400,
-              width: "100%",
-              gap: 1,
-            }}
-          >
-            <Box component="span">Data</Box>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                inputFormat="DD/MM/YYYY"
-                maxDate={dayjs(Date.now())}
-                value={dateCases}
-                onChange={(newValue) => {
-                  setDateCases(newValue);
-                }}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </LocalizationProvider>
-          </Box>
-        </Box>
+              <Box component="span">UF</Box>
+              <FormControl fullWidth>
+                <Select
+                  value={unitFederation}
+                  onChange={handleUnitFederationChange}
+                  fullWidth
+                  displayEmpty
+                >
+                  {unitFederations.map((uf) => (
+                    <MenuItem key={uf.value} value={uf.value}>
+                      {uf.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+                gap: 1,
+              }}
+            >
+              <Box component="span">Data</Box>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  inputFormat="DD/MM/YYYY"
+                  maxDate={dayjs(Date.now())}
+                  value={dateCases}
+                  onChange={(newValue) => {
+                    setDateCases(newValue);
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+              </LocalizationProvider>
+            </Box>
+          </Grid>
+        </Grid>
         <Button
           onClick={getCoronavirusCasesData}
           variant="contained"
@@ -213,63 +144,40 @@ const Home: React.FC = () => {
           Mostrar dados
         </Button>
       </Paper>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, mt: 3 }} elevation={3}>
-            <Typography variant="body1">
-              Distribuição de casos de COVID-19
+      {!!coronaVirusCasesData.results && (
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, mt: 3 }} elevation={3}>
+              <ChartDonut casesByCity={coronaVirusCasesData.results} />
+            </Paper>
+            <Typography
+              variant="body2"
+              color={theme.palette.error.main}
+              sx={{ mt: 2, ml: 0.5 }}
+            >
+              Distribuição de porcentagem dos municípios que tem confirmações no
+              dia diferente de 0
             </Typography>
-            <Chart
-              height={200}
-              options={chartOptions}
-              series={data.series.map((item) => item.data)}
-              type="donut"
-            />
-            <Grid container>
-              {data.series.map((item) => (
-                <Grid
-                  item
-                  key={item.label}
-                  sx={{
-                    alignItems: "center",
-                    display: "flex",
-                    p: 1,
-                  }}
-                  xs={6}
-                >
-                  <Box
-                    sx={{
-                      backgroundColor: item.color,
-                      borderRadius: "50%",
-                      height: 16,
-                      mr: 1,
-                      width: 16,
-                    }}
-                  />
-                  <Typography variant="subtitle2">{item.label}</Typography>
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
-          <Typography variant="body2" color={theme.palette.error.main} sx={{ mt: 2, ml: .5 }}>
-            Distribuição de porcentagem dos municípios que tem confirmações no
-            dia diferente de 0
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, mt: 3 }} elevation={3}>
-            <Typography variant="body1">
-              Lista de casos por município
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, mt: 3, overflowX: "auto" }} elevation={3}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Lista de casos por município
+              </Typography>
+              <TableList coronaVirusCasesData={coronaVirusCasesData} />
+            </Paper>
+            <Typography
+              variant="body2"
+              color={theme.palette.error.main}
+              sx={{ mt: 2, ml: 0.5 }}
+            >
+              Distribuição de municípios que tem confirmações no dia diferente
+              de 0 ordenados de mais confirmações no dia para menos confirmações
+              no dia
             </Typography>
-            <TableList coronaVirusCasesData={coronaVirusCasesData} />
-          </Paper>
-          <Typography variant="body2" color={theme.palette.error.main} sx={{ mt: 2, ml: .5 }}>
-            Distribuição de municípios que tem confirmações no dia diferente de
-            0 ordenados de mais confirmações no dia para menos confirmações no
-            dia
-          </Typography>
+          </Grid>
         </Grid>
-      </Grid>
+      )}
     </Box>
   );
 };

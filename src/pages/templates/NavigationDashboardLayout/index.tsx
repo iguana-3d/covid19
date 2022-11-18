@@ -1,19 +1,24 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
-import AppBar from "@mui/material/AppBar";
+import {
+  Box,
+  Drawer,
+  AppBar,
+  Toolbar,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Typography,
+} from "@mui/material";
+import { useTheme } from '@mui/material/styles';
 import CssBaseline from "@mui/material/CssBaseline";
-import Toolbar from "@mui/material/Toolbar";
-import List from "@mui/material/List";
-import Typography from "@mui/material/Typography";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 
 const drawerWidth = 240;
 
 const NavigationDashboardLayout: React.FC = () => {
+  const theme = useTheme();
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -22,14 +27,17 @@ const NavigationDashboardLayout: React.FC = () => {
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
         <Toolbar>
-          <Typography variant="h6" noWrap component="div">
-            Clipped drawer
+          <Typography variant="h4" noWrap component="div">
+            Logo
           </Typography>
         </Toolbar>
       </AppBar>
       <Drawer
         variant="permanent"
         sx={{
+          [theme.breakpoints.down('md')]: {
+            display: 'none'
+          },
           width: drawerWidth,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: {

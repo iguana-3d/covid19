@@ -25,16 +25,6 @@ interface IProps {
   coronaVirusCasesData: ICoronaVirusCases;
 }
 
-interface ICreateData {
-  createData: (
-    id: string | number,
-    data: string,
-    uf: string,
-    city: string,
-    dailyConfirmation: number
-  ) => Data;
-}
-
 type Order = "asc" | "desc";
 
 const createData = (
@@ -192,8 +182,8 @@ const TableList: React.FC<IProps> = ({ coronaVirusCasesData }) => {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <TableContainer sx={{ maxHeight: 440 }}>
-        <Table sx={{ minWidth: 750 }} size="small" stickyHeader>
+      <TableContainer sx={{ maxHeight: 440, overflowX: 'auto' }}>
+        <Table size="small" stickyHeader>
           <EnhancedTableHead
             numSelected={selected.length}
             order={order}
