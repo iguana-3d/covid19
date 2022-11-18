@@ -10,6 +10,7 @@ import {
   TableSortLabel,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
+import { v4 as uuidv4 } from 'uuid';
 //Types
 import { ICoronaVirusCases } from "../../services/coronavirus.types";
 
@@ -151,7 +152,6 @@ const TableList: React.FC<IProps> = ({ coronaVirusCasesData }) => {
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("data");
   const [selected, setSelected] = React.useState<readonly string[]>([]);
-
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
     property: keyof Data
@@ -172,8 +172,8 @@ const TableList: React.FC<IProps> = ({ coronaVirusCasesData }) => {
 
   const rows = coronaVirusCasesData?.results?.map((coronaVirusCase) => {
     return createData(
-      coronaVirusCase.city_ibge_code,
-      coronaVirusCase.last_available_date,
+      coronaVirusCase.city_ibge_code + uuidv4(),
+      coronaVirusCase.date,
       coronaVirusCase.state,
       coronaVirusCase.city,
       coronaVirusCase.new_confirmed

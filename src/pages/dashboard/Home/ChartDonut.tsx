@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import type { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts";
 import { ICasesByCity } from "../../services/coronavirus.types";
@@ -10,8 +10,10 @@ interface IProps {
 }
 
 const ChartDonut: React.FC<IProps> = ({ casesByCity }) => {
-  const data = {
-    series: casesByCity
+  const data = useMemo(() => {
+    return (
+      {
+        series: casesByCity
       ?.filter((caseByCity) => !!caseByCity.city)
       ?.map((caseByCity) => {
         return {
@@ -20,7 +22,9 @@ const ChartDonut: React.FC<IProps> = ({ casesByCity }) => {
           label: caseByCity.city,
         };
       }),
-  };
+      }
+    )
+  }, [casesByCity])
 
   const chartOptions: ApexOptions = {
     chart: {

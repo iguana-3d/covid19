@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Box,
-  Button,
   FormControl,
   Grid,
   MenuItem,
@@ -10,13 +9,17 @@ import {
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
+import LoadingButton from "@mui/lab/LoadingButton";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs, { Dayjs } from "dayjs";
 import TableList from "./TableList";
 import ChartDonut from "./ChartDonut";
+import { useForm, Controller } from "react-hook-form";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 //Services
 import { getCoronavirusCases } from "../../services/coronavirus.service";
 //Types
@@ -54,23 +57,37 @@ const unitFederations = [
 ];
 
 const Home: React.FC = () => {
-  const [unitFederation, setUnitFederation] = useState<string>("");
   const [dateCases, setDateCases] = useState<Dayjs | null>(null);
+  const [loading, setLoading] = useState(false);
   const [coronaVirusCasesData, setCoronaVirusCasesData] =
     useState<ICoronaVirusCases>({} as ICoronaVirusCases);
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm();
+
   const theme = useTheme();
 
-  const handleUnitFederationChange = (event: SelectChangeEvent) => {
-    setUnitFederation(event.target.value);
-  };
-
-  const getCoronavirusCasesData = () => {
-    getCoronavirusCases(dateCases, unitFederation)
+  const getCoronavirusCasesData = (data: any) => {
+    setLoading(true);
+    getCoronavirusCases(dateCases, data.uf)
       .then((responseData) => {
         setCoronaVirusCasesData(responseData);
+        setLoading(false);
       })
       .catch((error) => {
-        console.log(error);
+        setLoading(false);
+        toast.error(`${error.response.data.date[0]}`, {
+          position: "top-left",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
       });
   };
 
@@ -85,70 +102,93 @@ const Home: React.FC = () => {
         elevation={3}
       >
         <Typography variant="h3">Relatório de Casos</Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-                gap: 1,
-              }}
-            >
-              <Box component="span">UF</Box>
-              <FormControl fullWidth>
-                <Select
-                  value={unitFederation}
-                  onChange={handleUnitFederationChange}
-                  fullWidth
-                  displayEmpty
-                >
-                  {unitFederations.map((uf) => (
-                    <MenuItem key={uf.value} value={uf.value}>
-                      {uf.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
+        <form onSubmit={handleSubmit(getCoronavirusCasesData)}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "100%",
+                  gap: 1,
+                }}
+              >
+                <Box component="span">UF</Box>
+                <FormControl>
+                  <Controller
+                    name="uf"
+                    defaultValue=""
+                    control={control}
+                    rules={{ required: "O campo é requerido." }}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        fullWidth
+                        displayEmpty
+                        error={!!errors.uf}
+                      >
+                        {unitFederations.map((uf) => (
+                          <MenuItem key={uf.value} value={uf.value}>
+                            {uf.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+                {errors.uf && (
+                  <Typography
+                    variant="body2"
+                    color={theme.palette.error.main}
+                    sx={{ m: 1 }}
+                  >
+                    Selecione uma Unidade Federativa
+                  </Typography>
+                )}
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "100%",
+                  gap: 1,
+                }}
+              >
+                <Box component="span">Data</Box>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    inputFormat="DD/MM/YYYY"
+                    maxDate={dayjs(Date.now())}
+                    value={dateCases}
+                    onChange={(newValue) => {
+                      setDateCases(newValue);
+                    }}
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+                </LocalizationProvider>
+              </Box>
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-                gap: 1,
-              }}
-            >
-              <Box component="span">Data</Box>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  inputFormat="DD/MM/YYYY"
-                  maxDate={dayjs(Date.now())}
-                  value={dateCases}
-                  onChange={(newValue) => {
-                    setDateCases(newValue);
-                  }}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-              </LocalizationProvider>
-            </Box>
-          </Grid>
-        </Grid>
-        <Button
-          onClick={getCoronavirusCasesData}
-          variant="contained"
-          sx={{ width: "max-content" }}
-        >
-          Mostrar dados
-        </Button>
+          <LoadingButton
+            sx={{ width: "max-content", mt: 3 }}
+            loading={loading}
+            loadingPosition="center"
+            variant="contained"
+            type="submit"
+          >
+            Mostrar dados
+          </LoadingButton>
+        </form>
       </Paper>
       {!!coronaVirusCasesData.results && (
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Paper sx={{ p: 3, mt: 3 }} elevation={3}>
-              <ChartDonut casesByCity={coronaVirusCasesData.results} />
+              <ChartDonut
+                casesByCity={coronaVirusCasesData.results?.slice(0, 10)}
+              />
             </Paper>
             <Typography
               variant="body2"
@@ -178,6 +218,7 @@ const Home: React.FC = () => {
           </Grid>
         </Grid>
       )}
+      <ToastContainer />
     </Box>
   );
 };
